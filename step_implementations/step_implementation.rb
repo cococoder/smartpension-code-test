@@ -1,25 +1,45 @@
-require 'test/unit'
-include Test::Unit::Assertions
-
-@vowels = nil
-
-step 'Vowels in English language are <vowels>.' do |vowels|
-  @vowels = vowels.scan(/./)
+require("test/unit")
+require("test/unit/rr")
+require("rr")
+require("byebug")
+include(Test::Unit::Assertions)
+require_relative("../lib/model.rb")
+Gauge.configure do |config|
+  config.include(RR::DSL)
 end
-
-step 'The word <word> has <count> vowels.' do |word, expected_count|
-  assert_equal(expected_count.to_i, count_vowels(word))
+step("log enteries <table>") do |entries|
+  @entries = []
+  entries.rows.each do |row|
+    @entries << Entry.from(row["entry"])
+  end
 end
-
-step 'Almost all words have vowels <table>' do |words_table|
-  words_table.rows.each do |row|
-    word = row['Word']
-    expected_count = row['Vowel Count'].to_i
-    actual_count = count_vowels(word)
-    assert_equal(expected_count, actual_count)
+step("when counted by views") do
+  @views = Counter.new(@entries).count(:views)
+end
+step("when counted by unique page views") do
+  @unique_views = Counter.new(@entries).count(:unique_views)
+end
+step("should display unique views <table>") do |expected|
+  expected.rows.each do |row|
+    index = (row["ordinal"].to_i - 1)
+    page_view = @unique_views[index]
+    assert(page_view.to_s == row["output"], "#{row["output"]}#{" shoud be at index "}#{index}#{" but it was "}#{page_view.to_s}")
+  end
+end
+step("should display views <table>") do |expected|
+  expected.rows.each do |row|
+    index = (row["ordinal"].to_i - 1)
+    page_view = @views[index]
+    assert(page_view.to_s == row["output"], "#{row["output"]}#{" shoud be at index "}#{index}#{" but it was "}#{page_view.to_s}")
   end
 end
 
-def count_vowels(string)
-  string.count(@vowels.to_s)
+step 'the webserver.log is <file>' do |file|
+	@file_contents = file
+end
+step 'create a parser' do ||
+	@parser = LogParser.new(@file_contents)
+end
+step 'parse webserver log' do ||
+  @views,@unique_views =  @parser.parse
 end

@@ -1,0 +1,35 @@
+Webserver log Parser
+
+
+## Dependancies
+
+- install gauge ( brew install gauge)
+- ruby 2.6.3
+
+## To run tests
+
+gauge run
+
+this will create a html report which can be found in
+
+reports/html-report/index.html showing the results.
+
+## How it works
+
+to call the parser please call bundle exec .bin/parser <file_name>
+
+## Things I would improve
+
+- I would use regeular exppressions to extract the data from the lines in the webserver log.
+  I would then fail if the row does not conform
+
+- I would implement a streaming solution,so that you dont have to read the whole file in one go.
+
+
+
+
+
+
+
+
+
